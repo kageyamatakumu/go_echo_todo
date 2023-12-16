@@ -28,10 +28,18 @@ func NewRouter(uc controller.IUserController, tc controller.ITaskController) *ec
 		CookieSameSite: http.SameSiteDefaultMode,
 		// CookieMaxAge: 60,
 	}))
+
 	e.POST("/signup", uc.SignUp)
 	e.POST("/login", uc.LogIn)
-	e.POST("/logout", uc.LogOut)
 	e.GET("/csrf", uc.CsrfToken)
+	e.POST("/logout", uc.LogOut)
+
+	u := e.Group("/users")
+	u.Use(echojwt.WithConfig(echojwt.Config{
+		SigningKey: []byte(os.Getenv("SECRET")),
+		TokenLookup: "cookie:jwtToken",
+	}))
+	u.PUT("/updateName", uc.UpdateUserName)
 
 	t := e.Group("/tasks")
 	t.Use(echojwt.WithConfig(echojwt.Config{
