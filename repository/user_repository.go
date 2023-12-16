@@ -1,14 +1,17 @@
 package repository
 
 import (
+	"fmt"
 	"go-rest-api/model"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type IUserRepository interface {
 	GetUserByEmail(user *model.User, email string) error
 	CreateUser(user *model.User) error
+	UpdateUserName(user * model.User, userId uint) error
 }
 
 type userRepository struct {
@@ -33,5 +36,17 @@ func (ur *userRepository) CreateUser(user *model.User) error {
 		return err
 	}
 
+	return nil
+}
+
+func (ur *userRepository) UpdateUserName(user *model.User, userId uint) error {
+	// Clauses(clause.Returning{}): RETURNING句: Postgresqlの独自拡張で、insert,update,deleteの結果を返す機能。
+	result := ur.db.Model(user).Clauses(clause.Returning{}).Where("id=?", userId).Update("name", user.Name)
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected < 1 {
+		return fmt.Errorf("object does not exist")
+	}
 	return nil
 }

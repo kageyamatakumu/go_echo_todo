@@ -15,6 +15,7 @@ import (
 type IUserUseCase interface {
 	SignUp(user model.User) (model.UserResponse, error)
 	Login(user model.User) (string, error)
+	UpdateUserName(user model.User, useId uint) (model.UserResponse, error)
 }
 
 type userUseCase struct {
@@ -70,4 +71,19 @@ func (uu *userUseCase) Login(user model.User) (string, error) {
 	}
 
 	return tokenString, nil
+}
+
+
+func (uu *userUseCase) UpdateUserName(user model.User, userId uint) (model.UserResponse, error) {
+	if err := uu.ur.UpdateUserName(&user, userId); err != nil {
+		return model.UserResponse{}, err
+	}
+
+	resUser := model.UserResponse {
+		ID: user.ID,
+		Email: user.Email,
+		Name: user.Name,
+	}
+
+	return resUser, nil
 }
