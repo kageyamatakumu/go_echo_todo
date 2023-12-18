@@ -15,6 +15,7 @@ type ITaskController interface {
 	GetTaskById(c echo.Context) error
 	CreateTask(c echo.Context) error
 	UpdateTask(c echo.Context) error
+	UpdateTaskStatus(c echo.Context) error
 	DeleteTask(c echo.Context) error
 }
 
@@ -85,6 +86,25 @@ func (tc *taskController) UpdateTask(c echo.Context) error {
 	taskRes, err := tc.tu.UpdateTask(task, uint(userId.(float64)), uint(taskId))
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, taskRes)
+}
+
+func (tc *taskController) UpdateTaskStatus(c echo.Context) error {
+	user := c.Get("user").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	userId := claims["user_id"]
+	id := c.Param(("taskId"))
+	taskId, _ := strconv.Atoi(id)
+
+	task := model.Task{}
+	if err := c.Bind(&task); err != nil {
+		return c.JSON(http.StatusBadRequest, err)
+	}
+	taskRes, err := tc.tu.UpdateTaskStatus(task, uint(userId.(float64)), uint(taskId))
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err)
 	}
 
 	return c.JSON(http.StatusOK, taskRes)
