@@ -8,6 +8,7 @@ import (
 
 type ITaskValidator interface {
 	TaskValidate(task model.Task) error
+	TaskStatusValidate(task model.Task) error
 }
 
 type taskValidator struct {}
@@ -26,3 +27,11 @@ func (tv *taskValidator) TaskValidate(task model.Task) error {
 	)
 }
 
+func (tv *taskValidator) TaskStatusValidate(task model.Task) error {
+	return validation.ValidateStruct(&task,
+		validation.Field(
+			&task.Status,
+			validation.In(model.TaskStatusUnstarted, model.TaskStatusStarted, model.TaskStatusCompleted).Error("The status must be one of the following: TaskStatusUnstarted, TaskStatusStarted, or TaskStatusCompleted."),
+		),
+	)
+}

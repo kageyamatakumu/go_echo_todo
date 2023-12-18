@@ -13,6 +13,7 @@ type ITaskRepository interface {
 	GetTaskById(task *model.Task, userId uint, taskId uint) error
 	CreateTask(task *model.Task) error
 	UpdateTask(task *model.Task, userId uint, taskId uint) error
+	UpdateTaskStatus(task *model.Task, userId uint, taskId uint) error
 	DeleteTask(userId uint, taskId uint) error
 }
 
@@ -53,6 +54,17 @@ func (tr *taskRepository) CreateTask(task *model.Task) error {
 
 func (tr *taskRepository) UpdateTask(task *model.Task, userId uint, taskId uint) error {
 	result := tr.db.Model(task).Clauses(clause.Returning{}).Where("id=? AND user_id=?", taskId, userId).Update("title", task.Title)
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected < 1 {
+		return fmt.Errorf("object does not exist")
+	}
+	return nil
+}
+
+func (tr *taskRepository) UpdateTaskStatus(task *model.Task, userId uint, taskId uint) error {
+	result := tr.db.Model(task).Clauses(clause.Returning{}).Where("id=? AND user_id=?", taskId, userId).Update("status", task.Status)
 	if result.Error != nil {
 		return result.Error
 	}

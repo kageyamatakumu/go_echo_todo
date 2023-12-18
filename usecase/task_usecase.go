@@ -11,6 +11,7 @@ type ITaskUsecase interface {
 	GetTaskById(userId uint, taskId uint) (model.TaskResponse, error)
 	CreateTask(task model.Task) (model.TaskResponse, error)
 	UpdateTask(task model.Task, userId uint, taskId uint) (model.TaskResponse, error)
+	UpdateTaskStatus(task model.Task, userId uint, taskId uint) (model.TaskResponse, error)
 	DeleteTask(userId uint, taskId uint) error
 }
 
@@ -66,6 +67,7 @@ func (tu *taskUsecase) CreateTask(task model.Task) (model.TaskResponse, error) {
 	resTask := model.TaskResponse{
 		ID: task.ID,
 		Title: task.Title,
+		Status: task.Status,
 		CreatedAt: task.CreatedAt,
 		UpdatedAt: task.UpdatedAt,
 	}
@@ -83,6 +85,25 @@ func (tu *taskUsecase) UpdateTask(task model.Task, userId uint, taskId uint) (mo
 	resTask := model.TaskResponse{
 		ID: task.ID,
 		Title: task.Title,
+		Status: task.Status,
+		CreatedAt: task.CreatedAt,
+		UpdatedAt: task.UpdatedAt,
+	}
+
+	return resTask, nil
+}
+
+func (tu *taskUsecase) UpdateTaskStatus(task model.Task, userId uint, taskId uint) (model.TaskResponse, error) {
+	if err := tu.tv.TaskStatusValidate(task); err != nil {
+		return model.TaskResponse{}, err
+	}
+	if err := tu.tr.UpdateTaskStatus(&task, userId, taskId); err != nil {
+		return model.TaskResponse{}, err
+	}
+	resTask := model.TaskResponse{
+		ID: task.ID,
+		Title: task.Title,
+		Status: task.Status,
 		CreatedAt: task.CreatedAt,
 		UpdatedAt: task.UpdatedAt,
 	}
