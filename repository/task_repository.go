@@ -15,6 +15,7 @@ type ITaskRepository interface {
 	UpdateTask(task *model.Task, userId uint, taskId uint) error
 	UpdateTaskStatus(task *model.Task, userId uint, taskId uint) error
 	DeleteTask(userId uint, taskId uint) error
+	NarrowDownStatus(tasks *[]model.Task, userId uint, taskStatus int) error
 }
 
 type taskRepository struct {
@@ -81,6 +82,13 @@ func (tr *taskRepository) DeleteTask(userId uint, taskId uint) error {
 	}
 	if result.RowsAffected < 1 {
 		return fmt.Errorf("object does not exist")
+	}
+	return nil
+}
+
+func (tr *taskRepository) NarrowDownStatus(tasks *[]model.Task, userId uint, taskStatus int) error {
+	if err := tr.db.Joins("User").Where("user_id=? AND status=?", userId, taskStatus).Order("created_at").Find(tasks).Error; err != nil {
+		return err
 	}
 	return nil
 }
