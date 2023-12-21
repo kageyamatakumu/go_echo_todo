@@ -13,6 +13,7 @@ type ITaskUsecase interface {
 	UpdateTask(task model.Task, userId uint, taskId uint) (model.TaskResponse, error)
 	UpdateTaskStatus(task model.Task, userId uint, taskId uint) (model.TaskResponse, error)
 	DeleteTask(userId uint, taskId uint) error
+	NarrowDownStatus(userId uint, taskStatus string) ([]model.TaskResponse, error)
 }
 
 type taskUsecase struct {
@@ -117,4 +118,35 @@ func (tu *taskUsecase) DeleteTask(userId uint, taskId uint) error {
 	}
 
 	return nil
+}
+
+func (tu *taskUsecase) NarrowDownStatus(userId uint, taskStatus string) ([]model.TaskResponse, error) {
+	var status int
+
+	switch taskStatus {
+		case "Unstarted":
+			status = int(model.TaskStatusUnstarted)
+		case "Started":
+			status = int(model.TaskStatusStarted)
+		case "Completed":
+			status = int(model.TaskStatusCompleted)
+	}
+
+	tasks := []model.Task{}
+	if err := tu.tr.NarrowDownStatus(&tasks, userId, status); err != nil {
+		return nil , err
+	}
+	resTasks := []model.TaskResponse{}
+	for _, v := range tasks {
+		t := model.TaskResponse{
+			ID: v.ID,
+			Title: v.Title,
+			Status: v.Status,
+			CreatedAt: v.CreatedAt,
+			UpdatedAt: v.UpdatedAt,
+		}
+		resTasks = append(resTasks, t)
+	}
+
+	return resTasks, nil
 }
