@@ -69,6 +69,7 @@ func (tu *taskUsecase) CreateTask(task model.Task) (model.TaskResponse, error) {
 		ID: task.ID,
 		Title: task.Title,
 		Status: task.Status,
+		Memo: task.Memo,
 		CreatedAt: task.CreatedAt,
 		UpdatedAt: task.UpdatedAt,
 	}
@@ -87,6 +88,7 @@ func (tu *taskUsecase) UpdateTask(task model.Task, userId uint, taskId uint) (mo
 		ID: task.ID,
 		Title: task.Title,
 		Status: task.Status,
+		Memo: task.Memo,
 		CreatedAt: task.CreatedAt,
 		UpdatedAt: task.UpdatedAt,
 	}
@@ -105,6 +107,7 @@ func (tu *taskUsecase) UpdateTaskStatus(task model.Task, userId uint, taskId uin
 		ID: task.ID,
 		Title: task.Title,
 		Status: task.Status,
+		Memo: task.Memo,
 		CreatedAt: task.CreatedAt,
 		UpdatedAt: task.UpdatedAt,
 	}
@@ -142,6 +145,7 @@ func (tu *taskUsecase) NarrowDownStatus(userId uint, taskStatus string) ([]model
 			ID: v.ID,
 			Title: v.Title,
 			Status: v.Status,
+			Memo: v.Memo,
 			CreatedAt: v.CreatedAt,
 			UpdatedAt: v.UpdatedAt,
 		}
