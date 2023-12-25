@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"fmt"
 	"go-rest-api/model"
 	"go-rest-api/repository"
 	"go-rest-api/validator"
@@ -14,6 +15,7 @@ type ITaskUsecase interface {
 	UpdateTaskStatus(task model.Task, userId uint, taskId uint) (model.TaskResponse, error)
 	DeleteTask(userId uint, taskId uint) error
 	NarrowDownStatus(userId uint, taskStatus string) ([]model.TaskResponse, error)
+	FuzzySearch(userId uint, keyword string, taskStatus ...string)([]model.TaskResponse, error)
 }
 
 type taskUsecase struct {
@@ -150,6 +152,46 @@ func (tu *taskUsecase) NarrowDownStatus(userId uint, taskStatus string) ([]model
 			UpdatedAt: v.UpdatedAt,
 		}
 		resTasks = append(resTasks, t)
+	}
+
+	return resTasks, nil
+}
+
+func (tu *taskUsecase) FuzzySearch(userId uint, keyword string, taskStatus ...string)([]model.TaskResponse, error) {
+	var status int
+
+	switch taskStatus[0] {
+		case "Unstarted":
+			status = int(model.TaskStatusUnstarted)
+		case "Started":
+			status = int(model.TaskStatusStarted)
+		case "Completed":
+			status = int(model.TaskStatusCompleted)
+		default:
+			status = 99
+	}
+
+	tasks := make([]model.Task, 0)
+	if status != 99 {
+		if err := tu.tr.FuzzySearchStatus(&tasks, userId, keyword, status); err != nil {
+			return nil, err
+		}
+	} else {
+		fmt.Println("走って")
+		if err := tu.tr.FuzzySearch(&tasks, userId, keyword); err != nil {
+			return nil, err
+		}
+	}
+	resTasks := make([]model.TaskResponse, len(tasks))
+	for i, v := range tasks {
+		resTasks[i] = model.TaskResponse {
+			ID: v.ID,
+			Title: v.Title,
+			Status: v.Status,
+			Memo: v.Memo,
+			CreatedAt: v.CreatedAt,
+			UpdatedAt: v.UpdatedAt,
+		}
 	}
 
 	return resTasks, nil

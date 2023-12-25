@@ -51,6 +51,7 @@ func NewRouter(uc controller.IUserController, tc controller.ITaskController) *ec
 	// http://localhost:8080/tasks/status?taskStatus={Started, Unstarted or Completed}
 	// taskStatusはcontrollerの "c.QueryParam("taskStatus")"で設定している
 	t.GET("/status", tc.NarrowDownStatus)
+	t.GET("/search/status", tc.FuzzySearch)
 	t.POST("", tc.CreateTask)
 	t.PUT("/:taskId", tc.UpdateTask)
 	t.PUT("/:taskId/statusUpdate", tc.UpdateTaskStatus)

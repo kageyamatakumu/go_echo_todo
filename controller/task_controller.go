@@ -18,6 +18,7 @@ type ITaskController interface {
 	UpdateTaskStatus(c echo.Context) error
 	DeleteTask(c echo.Context) error
 	NarrowDownStatus(c echo.Context) error
+	FuzzySearch(c echo.Context) error
 }
 
 type taskController struct {
@@ -136,6 +137,21 @@ func (tc *taskController) NarrowDownStatus(c echo.Context) error {
 	taskRes, err := tc.tu.NarrowDownStatus(uint(userId.(float64)), taskStatus)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, taskRes)
+}
+
+func (tc *taskController) FuzzySearch(c echo.Context) error {
+	user := c.Get("user").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	userId := claims["user_id"]
+	tasStatus := c.QueryParam("taskStatus")
+	search := c.QueryParam("search")
+
+	taskRes, err := tc.tu.FuzzySearch(uint(userId.(float64)), search, tasStatus)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err)
 	}
 
 	return c.JSON(http.StatusOK, taskRes)
