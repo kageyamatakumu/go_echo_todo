@@ -7,6 +7,7 @@ type Task struct {
 	Title     string     `json:"title" gorm:"not null"`
 	Status    TaskStatus `json:"status" gorm:"not null; default:0"`
 	Memo      string     `json:"memo" gorm:"size: 65535"`
+	DeadLine  time.Time  `json:"dead_line" gorm:"not null; default:CURRENT_TIMESTAMP; type:date"`
 	CreatedAt time.Time  `json:"created_at"`
 	UpdatedAt time.Time  `json:"updated_at"`
 	User      User       `json:"user" gorm:"foreignKey:UserId; constraint:OnDelete:CASCADE"`
@@ -18,6 +19,7 @@ type TaskResponse struct {
 	Title     string     `json:"title" gorm:"not null"`
 	Status    TaskStatus `json:"status" gorm:"not null; default:0"`
 	Memo      string     `json:"memo" gorm:"size: 65535"`
+	DeadLine  time.Time  `json:"dead_line" gorm:"not null; default:CURRENT_TIMESTAMP; type:date"`
 	CreatedAt time.Time  `json:"created_at"`
 	UpdatedAt time.Time  `json:"updated_at"`
 }

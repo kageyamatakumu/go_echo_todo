@@ -3,6 +3,7 @@ package repository
 import (
 	"fmt"
 	"go-rest-api/model"
+	"time"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -11,6 +12,7 @@ import (
 type ITaskRepository interface {
 	GetAllTasks(tasks *[]model.Task, userId uint) error
 	GetTaskById(task *model.Task, userId uint, taskId uint) error
+	GetTasksByDeadline(task *[]model.Task, userId uint, fromDate time.Time, toDate time.Time) error
 	CreateTask(task *model.Task) error
 	UpdateTask(task *model.Task, userId uint, taskId uint) error
 	UpdateTaskStatus(task *model.Task, userId uint, taskId uint) error
@@ -47,6 +49,14 @@ func (tr *taskRepository) GetTaskById(task *model.Task, userId uint, taskId uint
 	return nil
 }
 
+func (tr *taskRepository) GetTasksByDeadline(tasks *[]model.Task, userId uint, fromDate time.Time, toDate time.Time) error {
+	if err := tr.db.Joins("User").Where("user_id=? AND dead_line BETWEEN ? AND ?", userId, fromDate, toDate).Find(tasks).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (tr *taskRepository) CreateTask(task *model.Task) error {
 	if err := tr.db.Create(task).Error; err != nil {
 		return err
@@ -56,7 +66,7 @@ func (tr *taskRepository) CreateTask(task *model.Task) error {
 }
 
 func (tr *taskRepository) UpdateTask(task *model.Task, userId uint, taskId uint) error {
-	result := tr.db.Model(task).Clauses(clause.Returning{}).Where("id=? AND user_id=?", taskId, userId).Updates(map[string]interface{}{"title": task.Title, "memo": task.Memo})
+	result := tr.db.Model(task).Clauses(clause.Returning{}).Where("id=? AND user_id=?", taskId, userId).Updates(map[string]interface{}{"title": task.Title, "memo": task.Memo, "status": task.Status, "dead_line": task.DeadLine})
 	if result.Error != nil {
 		return result.Error
 	}
