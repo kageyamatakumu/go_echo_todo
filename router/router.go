@@ -52,6 +52,7 @@ func NewRouter(uc controller.IUserController, tc controller.ITaskController) *ec
 	// taskStatusはcontrollerの "c.QueryParam("taskStatus")"で設定している
 	t.GET("/status", tc.NarrowDownStatus)
 	t.GET("/search/status", tc.FuzzySearch)
+	t.GET("/by-deadlined", tc.GetTasksByDeadline)
 	t.POST("", tc.CreateTask)
 	t.PUT("/:taskId", tc.UpdateTask)
 	t.PUT("/:taskId/statusUpdate", tc.UpdateTaskStatus)

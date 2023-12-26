@@ -1,15 +1,16 @@
 package usecase
 
 import (
-	"fmt"
 	"go-rest-api/model"
 	"go-rest-api/repository"
 	"go-rest-api/validator"
+	"time"
 )
 
 type ITaskUsecase interface {
 	GetAllTasks(userId uint) ([]model.TaskResponse, error)
 	GetTaskById(userId uint, taskId uint) (model.TaskResponse, error)
+	GetTasksByDeadline(userId uint, fromDate time.Time, toDate time.Time) ([]model.TaskResponse, error)
 	CreateTask(task model.Task) (model.TaskResponse, error)
 	UpdateTask(task model.Task, userId uint, taskId uint) (model.TaskResponse, error)
 	UpdateTaskStatus(task model.Task, userId uint, taskId uint) (model.TaskResponse, error)
@@ -37,6 +38,7 @@ func (tu *taskUsecase) GetAllTasks(userId uint) ([]model.TaskResponse, error) {
 		t := model.TaskResponse{
 			ID: v.ID,
 			Title: v.Title,
+			DeadLine: v.DeadLine,
 			CreatedAt: v.CreatedAt,
 			UpdatedAt: v.UpdatedAt,
 		}
@@ -53,11 +55,33 @@ func (tu *taskUsecase) GetTaskById(userId uint, taskId uint) (model.TaskResponse
 	resTask := model.TaskResponse{
 		ID: task.ID,
 		Title: task.Title,
+		DeadLine: task.DeadLine,
 		CreatedAt: task.CreatedAt,
 		UpdatedAt: task.UpdatedAt,
 	}
 
 	return resTask, nil
+}
+
+func (tu *taskUsecase) GetTasksByDeadline(userId uint, fromDate time.Time, toDate time.Time) ([]model.TaskResponse, error) {
+	tasks := make([]model.Task, 0)
+	if err := tu.tr.GetTasksByDeadline(&tasks, userId, fromDate, toDate); err != nil {
+		return nil, err
+	}
+	resTasks := make([]model.TaskResponse, len(tasks))
+	for i, v := range tasks {
+		resTasks[i] = model.TaskResponse {
+			ID: v.ID,
+			Title: v.Title,
+			Status: v.Status,
+			Memo: v.Memo,
+			DeadLine: v.DeadLine,
+			CreatedAt: v.CreatedAt,
+			UpdatedAt: v.UpdatedAt,
+		}
+	}
+
+	return resTasks, nil
 }
 
 func (tu *taskUsecase) CreateTask(task model.Task) (model.TaskResponse, error) {
@@ -72,6 +96,7 @@ func (tu *taskUsecase) CreateTask(task model.Task) (model.TaskResponse, error) {
 		Title: task.Title,
 		Status: task.Status,
 		Memo: task.Memo,
+		DeadLine: task.DeadLine,
 		CreatedAt: task.CreatedAt,
 		UpdatedAt: task.UpdatedAt,
 	}
@@ -91,6 +116,7 @@ func (tu *taskUsecase) UpdateTask(task model.Task, userId uint, taskId uint) (mo
 		Title: task.Title,
 		Status: task.Status,
 		Memo: task.Memo,
+		DeadLine: task.DeadLine,
 		CreatedAt: task.CreatedAt,
 		UpdatedAt: task.UpdatedAt,
 	}
@@ -110,6 +136,7 @@ func (tu *taskUsecase) UpdateTaskStatus(task model.Task, userId uint, taskId uin
 		Title: task.Title,
 		Status: task.Status,
 		Memo: task.Memo,
+		DeadLine: task.DeadLine,
 		CreatedAt: task.CreatedAt,
 		UpdatedAt: task.UpdatedAt,
 	}
@@ -148,6 +175,7 @@ func (tu *taskUsecase) NarrowDownStatus(userId uint, taskStatus string) ([]model
 			Title: v.Title,
 			Status: v.Status,
 			Memo: v.Memo,
+			DeadLine: v.DeadLine,
 			CreatedAt: v.CreatedAt,
 			UpdatedAt: v.UpdatedAt,
 		}
@@ -177,7 +205,6 @@ func (tu *taskUsecase) FuzzySearch(userId uint, keyword string, taskStatus ...st
 			return nil, err
 		}
 	} else {
-		fmt.Println("走って")
 		if err := tu.tr.FuzzySearch(&tasks, userId, keyword); err != nil {
 			return nil, err
 		}
@@ -189,6 +216,7 @@ func (tu *taskUsecase) FuzzySearch(userId uint, keyword string, taskStatus ...st
 			Title: v.Title,
 			Status: v.Status,
 			Memo: v.Memo,
+			DeadLine: v.DeadLine,
 			CreatedAt: v.CreatedAt,
 			UpdatedAt: v.UpdatedAt,
 		}
