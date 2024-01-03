@@ -21,7 +21,7 @@ func main() {
 	userUsecase := usecase.NewUserUseCase(userRepository, userValidator, teamMemberRepository)
 	taskUsecase := usecase.NewTaskUsecase(taskRepository, taskValidator)
 	organizationUsecase := usecase.NewOrganizationUseCase(organizationRepository)
-	teamUsecase := usecase.NewTeamUseCase(teamRepository)
+	teamUsecase := usecase.NewTeamUseCase(teamRepository, teamMemberRepository)
 	userController := controller.NewUserContoller(userUsecase)
 	taskController := controller.NewTaskController(taskUsecase)
 	organizationController := controller.NewOrganizationController(organizationUsecase)
