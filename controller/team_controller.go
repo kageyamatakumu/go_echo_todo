@@ -74,10 +74,13 @@ func (tc *teamController) GetTeamsByOrganizationId(c echo.Context) error {
 }
 
 func (tc *teamController) DeleteTeam(c echo.Context) error {
+	user := c.Get("user").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	userId := claims["user_id"]
 	id := c.Param("teamId")
-	organizationId, _ := strconv.Atoi(id)
+	teamId, _ := strconv.Atoi(id)
 
-	if err := tc.tu.DeleteTeam(uint(organizationId)); err != nil {
+	if err := tc.tu.DeleteTeam(uint(teamId), uint(userId.(float64))); err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 

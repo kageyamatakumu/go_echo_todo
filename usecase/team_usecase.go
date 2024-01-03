@@ -13,15 +13,16 @@ type ITeamUseCase interface {
 	// 組織内のチーム一覧を取得する
 	GetTeamsByOrganizationId(organizationId uint) ([]model.TeamResponse, error)
 	// チームを削除する
-	DeleteTeam(teamId uint) error
+	DeleteTeam(teamId uint, userId uint) error
 }
 
 type teamUseCase struct {
 	tr repository.ITeamRepository
+	tmr repository.ITeamMemberRepository
 }
 
-func NewTeamUseCase(tr repository.ITeamRepository) ITeamUseCase {
-	return &teamUseCase{tr}
+func NewTeamUseCase(tr repository.ITeamRepository, tmr repository.ITeamMemberRepository) ITeamUseCase {
+	return &teamUseCase{tr, tmr}
 }
 
 func (tu *teamUseCase) GetAssignTeamByUserId(userId uint) ([]model.TeamResponse, error) {
@@ -74,7 +75,11 @@ func (tu *teamUseCase) GetTeamsByOrganizationId(organizationId uint) ([]model.Te
 	return resTeams, nil
 }
 
-func (tu *teamUseCase) DeleteTeam(teamId uint) error {
+func (tu *teamUseCase) DeleteTeam(teamId uint, userId uint) error {
+	teamMember := model.TeamMember{}
+	if err := tu.tmr.UnassignFromTeam(&teamMember, userId, teamId); err != nil {
+		return err
+	}
 	if err := tu.tr.DeleteTeam(teamId); err != nil {
 		return err
 	}

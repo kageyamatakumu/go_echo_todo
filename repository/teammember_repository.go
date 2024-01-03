@@ -34,7 +34,7 @@ func (tmr *teamMemberRepository) AssignToTeam(teamMember *model.TeamMember) erro
 }
 
 func (tmr *teamMemberRepository) UnassignFromTeam(teamMember *model.TeamMember, userId uint, teamId uint) error {
-	result := tmr.db.Model(teamMember).Clauses(clause.Returning{}).Where("user_id=? AND team_id=?", userId, teamId).Update("delete_flg", false)
+	result := tmr.db.Model(teamMember).Clauses(clause.Returning{}).Where("user_id=? AND team_id=?", userId, teamId).Update("delete_flg", true)
 	if result.Error != nil {
 		return result.Error
 	}
