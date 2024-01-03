@@ -17,6 +17,11 @@ type IUserController interface {
 	LogOut(c echo.Context) error
 	CsrfToken(c echo.Context) error
 	UpdateUserName(c echo.Context) error
+	AssignUserToOrganization(c echo.Context) error
+	// ユーザーをチームに加入させる
+	AssignUserToTeam(c echo.Context) error
+	// ユーザーをチームから外す
+	UnassignFromTeam(c echo.Context) error
 }
 
 type userController struct {
@@ -103,4 +108,48 @@ func (uc *userController) UpdateUserName(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusOK, userRes)
+}
+
+func (uc *userController) AssignUserToOrganization(c echo.Context) error {
+	userModel := model.User{}
+	if err := c.Bind(&userModel); err != nil {
+		return c.JSON(http.StatusBadRequest, err.Error())
+	}
+
+	userRes, err := uc.uu.AssignUserToOrganization(userModel, userModel.ID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, userRes)
+}
+
+
+func (uc *userController) AssignUserToTeam(c echo.Context) error {
+	teamMember := model.TeamMember{}
+	if err := c.Bind(&teamMember); err != nil {
+		return c.JSON(http.StatusBadRequest, err.Error())
+	}
+
+	teamMemberRes, err := uc.uu.AssignUserToTeam(teamMember, teamMember.UserID);
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, teamMemberRes)
+}
+
+
+func (uc *userController) UnassignFromTeam(c echo.Context) error {
+	teamMember := model.TeamMember{}
+	if err := c.Bind(&teamMember); err != nil {
+		return c.JSON(http.StatusBadRequest, err.Error())
+	}
+
+	teamMemberRes, err := uc.uu.UnassignFromTeam(teamMember, teamMember.UserID, teamMember.TeamID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, teamMemberRes)
 }
