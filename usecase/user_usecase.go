@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"fmt"
 	"go-rest-api/model"
 	"go-rest-api/repository"
 	"go-rest-api/validator"
@@ -15,16 +16,23 @@ import (
 type IUserUseCase interface {
 	SignUp(user model.User) (model.UserResponse, error)
 	Login(user model.User) (string, error)
-	UpdateUserName(user model.User, useId uint) (model.UserResponse, error)
+	UpdateUserName(user model.User, userId uint) (model.UserResponse, error)
+	// ユーザーを組織に加入させる
+	AssignUserToOrganization(user model.User, userId uint) (model.UserAssignResponse, error)
+	// ユーザーをチームに加入させる
+	AssignUserToTeam(teamMember model.TeamMember, userId uint) (model.TeamMemberReponse, error)
+	// ユーザーをチームから外す
+	UnassignFromTeam(teamMember model.TeamMember, userId uint, teamId uint) (model.TeamMemberReponse, error)
 }
 
 type userUseCase struct {
 	ur repository.IUserRepository
 	uv validator.IUserValidator
+	tmr repository.ITeamMemberRepository
 }
 
-func NewUserUseCase(ur repository.IUserRepository, uv validator.IUserValidator) IUserUseCase {
-	return &userUseCase{ur, uv}
+func NewUserUseCase(ur repository.IUserRepository, uv validator.IUserValidator, tmr repository.ITeamMemberRepository) IUserUseCase {
+	return &userUseCase{ur, uv, tmr}
 }
 
 func (uu *userUseCase) SignUp(user model.User) (model.UserResponse, error) {
@@ -86,4 +94,56 @@ func (uu *userUseCase) UpdateUserName(user model.User, userId uint) (model.UserR
 	}
 
 	return resUser, nil
+}
+
+
+func (uu *userUseCase) AssignUserToOrganization(user model.User, userId uint) (model.UserAssignResponse, error) {
+	if err := uu.ur.AssignUserToOrganization(&user, userId); err != nil {
+		return model.UserAssignResponse{}, err
+	}
+
+	resUserAssign := model.UserAssignResponse {
+		OrganizationId: user.OrganizationId,
+	}
+
+	return resUserAssign, nil
+}
+
+
+func (uu *userUseCase) AssignUserToTeam(teamMember model.TeamMember, userId uint) (model.TeamMemberReponse, error) {
+	teamMembers := make([]model.TeamMember, 0)
+	uu.tmr.GetTeamMembersByTeamId(&teamMembers, userId)
+	for _, v := range teamMembers {
+		if v.UserID == userId {
+			return model.TeamMemberReponse{}, fmt.Errorf("the user is already assigned to the team")
+		}
+	}
+
+	teamMember.UserID = userId
+	if err := uu.tmr.AssignToTeam(&teamMember); err != nil {
+		return model.TeamMemberReponse{}, err
+	}
+
+	resTeamMember := model.TeamMemberReponse {
+		TeamID: teamMember.TeamID,
+		UserID: teamMember.UserID,
+		DeleteFlg: teamMember.DeleteFlg,
+	}
+
+	return resTeamMember, nil
+}
+
+
+func (uu *userUseCase) UnassignFromTeam(teamMember model.TeamMember, userId uint, teamId uint) (model.TeamMemberReponse, error) {
+	if err := uu.tmr.UnassignFromTeam(&teamMember, userId, teamId); err != nil {
+		return model.TeamMemberReponse{}, err
+	}
+
+	resTeamMember := model.TeamMemberReponse {
+		TeamID: teamMember.TeamID,
+		UserID: teamMember.UserID,
+		DeleteFlg: teamMember.DeleteFlg,
+	}
+
+	return resTeamMember, nil
 }

@@ -10,8 +10,8 @@ type Task struct {
 	DeadLine  time.Time  `json:"dead_line" gorm:"not null; default:CURRENT_TIMESTAMP; type:date"`
 	CreatedAt time.Time  `json:"created_at"`
 	UpdatedAt time.Time  `json:"updated_at"`
-	User      User       `json:"user" gorm:"foreignKey:UserId; constraint:OnDelete:CASCADE"`
-	UserId    uint       `json:"userId" gorm:"not null"`
+	Team			Team       `json:"team" gorm:"foreignKey:TeamId; constraint:OnDelete:CASCADE"`
+	TeamId    uint       `json:"team_id" gorm:"not null"`
 }
 
 type TaskResponse struct {

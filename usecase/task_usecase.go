@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-type ITaskUsecase interface {
+type ITaskUseCase interface {
 	GetAllTasks(userId uint) ([]model.TaskResponse, error)
 	GetTaskById(userId uint, taskId uint) (model.TaskResponse, error)
 	GetTasksByDeadline(userId uint, fromDate time.Time, toDate time.Time) ([]model.TaskResponse, error)
@@ -19,16 +19,16 @@ type ITaskUsecase interface {
 	FuzzySearch(userId uint, keyword string, taskStatus ...string)([]model.TaskResponse, error)
 }
 
-type taskUsecase struct {
+type taskUseCase struct {
 	tr repository.ITaskRepository
 	tv validator.ITaskValidator
 }
 
-func NewTaskUsecase(tr repository.ITaskRepository, tv validator.ITaskValidator) ITaskUsecase {
-	return &taskUsecase{tr, tv}
+func NewTaskUsecase(tr repository.ITaskRepository, tv validator.ITaskValidator) ITaskUseCase {
+	return &taskUseCase{tr, tv}
 }
 
-func (tu *taskUsecase) GetAllTasks(userId uint) ([]model.TaskResponse, error) {
+func (tu *taskUseCase) GetAllTasks(userId uint) ([]model.TaskResponse, error) {
 	tasks := []model.Task{}
 	if err := tu.tr.GetAllTasks(&tasks, userId); err != nil {
 		return nil, err
@@ -47,7 +47,7 @@ func (tu *taskUsecase) GetAllTasks(userId uint) ([]model.TaskResponse, error) {
 	return resTasks, nil
 }
 
-func (tu *taskUsecase) GetTaskById(userId uint, taskId uint) (model.TaskResponse, error) {
+func (tu *taskUseCase) GetTaskById(userId uint, taskId uint) (model.TaskResponse, error) {
 	task := model.Task{}
 	if err := tu.tr.GetTaskById(&task, userId, taskId); err != nil {
 		return model.TaskResponse{}, err
@@ -63,7 +63,7 @@ func (tu *taskUsecase) GetTaskById(userId uint, taskId uint) (model.TaskResponse
 	return resTask, nil
 }
 
-func (tu *taskUsecase) GetTasksByDeadline(userId uint, fromDate time.Time, toDate time.Time) ([]model.TaskResponse, error) {
+func (tu *taskUseCase) GetTasksByDeadline(userId uint, fromDate time.Time, toDate time.Time) ([]model.TaskResponse, error) {
 	tasks := make([]model.Task, 0)
 	if err := tu.tr.GetTasksByDeadline(&tasks, userId, fromDate, toDate); err != nil {
 		return nil, err
@@ -84,7 +84,7 @@ func (tu *taskUsecase) GetTasksByDeadline(userId uint, fromDate time.Time, toDat
 	return resTasks, nil
 }
 
-func (tu *taskUsecase) CreateTask(task model.Task) (model.TaskResponse, error) {
+func (tu *taskUseCase) CreateTask(task model.Task) (model.TaskResponse, error) {
 	if err := tu.tv.TaskValidate(task); err != nil {
 		return model.TaskResponse{}, err
 	}
@@ -104,7 +104,7 @@ func (tu *taskUsecase) CreateTask(task model.Task) (model.TaskResponse, error) {
 	return resTask, nil
 }
 
-func (tu *taskUsecase) UpdateTask(task model.Task, userId uint, taskId uint) (model.TaskResponse, error) {
+func (tu *taskUseCase) UpdateTask(task model.Task, userId uint, taskId uint) (model.TaskResponse, error) {
 	if err := tu.tv.TaskValidate(task); err != nil {
 		return model.TaskResponse{}, err
 	}
@@ -124,7 +124,7 @@ func (tu *taskUsecase) UpdateTask(task model.Task, userId uint, taskId uint) (mo
 	return resTask, nil
 }
 
-func (tu *taskUsecase) UpdateTaskStatus(task model.Task, userId uint, taskId uint) (model.TaskResponse, error) {
+func (tu *taskUseCase) UpdateTaskStatus(task model.Task, userId uint, taskId uint) (model.TaskResponse, error) {
 	if err := tu.tv.TaskStatusValidate(task); err != nil {
 		return model.TaskResponse{}, err
 	}
@@ -144,7 +144,7 @@ func (tu *taskUsecase) UpdateTaskStatus(task model.Task, userId uint, taskId uin
 	return resTask, nil
 }
 
-func (tu *taskUsecase) DeleteTask(userId uint, taskId uint) error {
+func (tu *taskUseCase) DeleteTask(userId uint, taskId uint) error {
 	if err := tu.tr.DeleteTask(userId, taskId); err != nil {
 		return err
 	}
@@ -152,7 +152,7 @@ func (tu *taskUsecase) DeleteTask(userId uint, taskId uint) error {
 	return nil
 }
 
-func (tu *taskUsecase) NarrowDownStatus(userId uint, taskStatus string) ([]model.TaskResponse, error) {
+func (tu *taskUseCase) NarrowDownStatus(userId uint, taskStatus string) ([]model.TaskResponse, error) {
 	var status int
 
 	switch taskStatus {
@@ -185,7 +185,7 @@ func (tu *taskUsecase) NarrowDownStatus(userId uint, taskStatus string) ([]model
 	return resTasks, nil
 }
 
-func (tu *taskUsecase) FuzzySearch(userId uint, keyword string, taskStatus ...string)([]model.TaskResponse, error) {
+func (tu *taskUseCase) FuzzySearch(userId uint, keyword string, taskStatus ...string)([]model.TaskResponse, error) {
 	var status int
 
 	switch taskStatus[0] {

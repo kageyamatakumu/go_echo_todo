@@ -15,7 +15,7 @@ type ITaskController interface {
 	GetAllTasks(c echo.Context) error
 	GetTaskById(c echo.Context) error
 	GetTasksByDeadline(c echo.Context) error
-	CreateTask(c echo.Context) error
+	// CreateTask(c echo.Context) error
 	UpdateTask(c echo.Context) error
 	UpdateTaskStatus(c echo.Context) error
 	DeleteTask(c echo.Context) error
@@ -24,10 +24,10 @@ type ITaskController interface {
 }
 
 type taskController struct {
-	tu usecase.ITaskUsecase
+	tu usecase.ITaskUseCase
 }
 
-func NewTaskController(tu usecase.ITaskUsecase) ITaskController {
+func NewTaskController(tu usecase.ITaskUseCase) ITaskController {
 	return &taskController{tu}
 }
 
@@ -79,23 +79,23 @@ func (tc *taskController) GetTaskById(c echo.Context) error {
 		return c.JSON(http.StatusOK, taskRes)
 	}
 
-func (tc *taskController) CreateTask(c echo.Context) error {
-	user := c.Get("user").(*jwt.Token)
-	claims := user.Claims.(jwt.MapClaims)
-	userId := claims["user_id"]
+// func (tc *taskController) CreateTask(c echo.Context) error {
+// 	user := c.Get("user").(*jwt.Token)
+// 	claims := user.Claims.(jwt.MapClaims)
+// 	userId := claims["user_id"]
 
-	task := model.Task{}
-	if err := c.Bind(&task); err != nil {
-		return c.JSON(http.StatusBadRequest, err.Error())
-	}
-	task.UserId = uint(userId.(float64))
-	taskRes, err := tc.tu.CreateTask(task)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err.Error())
-	}
+// 	task := model.Task{}
+// 	if err := c.Bind(&task); err != nil {
+// 		return c.JSON(http.StatusBadRequest, err.Error())
+// 	}
+// 	task.UserId = uint(userId.(float64))
+// 	taskRes, err := tc.tu.CreateTask(task)
+// 	if err != nil {
+// 		return c.JSON(http.StatusInternalServerError, err.Error())
+// 	}
 
-	return c.JSON(http.StatusCreated, taskRes)
-}
+// 	return c.JSON(http.StatusCreated, taskRes)
+// }
 
 func (tc *taskController) UpdateTask(c echo.Context) error {
 	user := c.Get("user").(*jwt.Token)
@@ -120,7 +120,7 @@ func (tc *taskController) UpdateTaskStatus(c echo.Context) error {
 	user := c.Get("user").(*jwt.Token)
 	claims := user.Claims.(jwt.MapClaims)
 	userId := claims["user_id"]
-	id := c.Param(("taskId"))
+	id := c.Param("taskId")
 	taskId, _ := strconv.Atoi(id)
 
 	task := model.Task{}
