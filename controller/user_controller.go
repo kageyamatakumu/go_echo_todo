@@ -17,6 +17,9 @@ type IUserController interface {
 	LogOut(c echo.Context) error
 	CsrfToken(c echo.Context) error
 	UpdateUserName(c echo.Context) error
+	// ログインしているユーザーの情報を取得
+	GetLoggedInUserDetails(c echo.Context) error
+	// ユーザーを組織に加入させる
 	AssignUserToOrganization(c echo.Context) error
 	// ユーザーをチームに加入させる
 	AssignUserToTeam(c echo.Context) error
@@ -107,6 +110,21 @@ func (uc *userController) UpdateUserName(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
+
+	return c.JSON(http.StatusOK, userRes)
+}
+
+func (uc *userController) GetLoggedInUserDetails(c echo.Context) error {
+	user := c.Get("user").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	userId := claims["user_id"]
+
+	userModel := model.User{}
+	userRes, err := uc.uu.GetLoggedInUserDetails(userModel, uint(userId.(float64)))
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
 	return c.JSON(http.StatusOK, userRes)
 }
 

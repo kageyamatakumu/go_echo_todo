@@ -13,6 +13,8 @@ type IUserRepository interface {
 	CreateUser(user *model.User) error
 	UpdateUserName(user * model.User, userId uint) error
 	AssignUserToOrganization(user *model.User, userId uint) error
+	// ログインしているユーザーの情報を取得
+	GetLoggedInUserDetails(user *model.User, userId uint) error
 }
 
 type userRepository struct {
@@ -60,5 +62,13 @@ func (ur *userRepository) AssignUserToOrganization(user *model.User, userId uint
 	if result.RowsAffected < 1 {
 		return fmt.Errorf("object does not exist")
 	}
+	return nil
+}
+
+func (ur *userRepository) GetLoggedInUserDetails(user *model.User, userId uint) error {
+	if err := ur.db.Model(user).Where("id=?", userId).Find(user).Error; err != nil {
+		return err
+	}
+
 	return nil
 }
