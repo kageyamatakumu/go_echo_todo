@@ -40,6 +40,7 @@ func NewRouter(uc controller.IUserController, tc controller.ITaskController, oc 
 		SigningKey: []byte(os.Getenv("SECRET")),
 		TokenLookup: "cookie:jwtToken",
 	}))
+	u.GET("/userDetails", uc.GetLoggedInUserDetails)
 	u.PUT("/updateName", uc.UpdateUserName)
 	u.PUT("/assignToOrganization", uc.AssignUserToOrganization)
 	u.POST("/assignToTeam", uc.AssignUserToTeam)

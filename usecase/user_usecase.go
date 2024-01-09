@@ -16,6 +16,9 @@ import (
 type IUserUseCase interface {
 	SignUp(user model.User) (model.UserResponse, error)
 	Login(user model.User) (string, error)
+	// ログインしているユーザーの情報を取得
+	GetLoggedInUserDetails(user model.User, userId uint) (model.UserResponse, error)
+	// ユーザーの名前を更新する
 	UpdateUserName(user model.User, userId uint) (model.UserResponse, error)
 	// ユーザーを組織に加入させる
 	AssignUserToOrganization(user model.User, userId uint) (model.UserAssignResponse, error)
@@ -79,6 +82,21 @@ func (uu *userUseCase) Login(user model.User) (string, error) {
 	}
 
 	return tokenString, nil
+}
+
+
+func (uu *userUseCase) GetLoggedInUserDetails(user model.User, userId uint) (model.UserResponse, error) {
+	if err := uu.ur.GetLoggedInUserDetails(&user, userId); err != nil {
+		return model.UserResponse{}, nil
+	}
+
+	resUser := model.UserResponse {
+		ID: user.ID,
+		Email: user.Email,
+		Name: user.Name,
+	}
+
+	return resUser, nil
 }
 
 
