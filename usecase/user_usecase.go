@@ -26,6 +26,8 @@ type IUserUseCase interface {
 	AssignUserToTeam(teamMember model.TeamMember, userId uint) (model.TeamMemberReponse, error)
 	// ユーザーをチームから外す
 	UnassignFromTeam(teamMember model.TeamMember, userId uint, teamId uint) (model.TeamMemberReponse, error)
+	// 組織内のユーザー一覧情報を取得する
+	GetOrganizationUsers(organizationId uint) ([]model.UserResponse, error)
 }
 
 type userUseCase struct {
@@ -164,4 +166,24 @@ func (uu *userUseCase) UnassignFromTeam(teamMember model.TeamMember, userId uint
 	}
 
 	return resTeamMember, nil
+}
+
+
+func (uu *userUseCase) GetOrganizationUsers(organizationId uint) ([]model.UserResponse, error) {
+	users := make([]model.User, 0)
+	if err := uu.ur.GetOrganizationUsers(&users, organizationId); err != nil {
+		return nil, err
+	}
+
+	resUsers := make([]model.UserResponse, len(users))
+
+	for i, v := range users {
+		resUsers[i] = model.UserResponse{
+			ID: v.ID,
+			Email: v.Email,
+			Name: v.Name,
+		}
+	}
+
+	return resUsers, nil
 }
