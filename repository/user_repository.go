@@ -15,6 +15,8 @@ type IUserRepository interface {
 	AssignUserToOrganization(user *model.User, userId uint) error
 	// ログインしているユーザーの情報を取得
 	GetLoggedInUserDetails(user *model.User, userId uint) error
+	// 組織内のユーザー一覧情報を取得する
+	GetOrganizationUsers(users *[]model.User, organizationId uint) error
 }
 
 type userRepository struct {
@@ -66,7 +68,16 @@ func (ur *userRepository) AssignUserToOrganization(user *model.User, userId uint
 }
 
 func (ur *userRepository) GetLoggedInUserDetails(user *model.User, userId uint) error {
-	if err := ur.db.Model(user).Where("id=?", userId).Find(user).Error; err != nil {
+	if err := ur.db.Where("id=?", userId).Find(user).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
+
+func (ur *userRepository) GetOrganizationUsers(users *[]model.User, organizationId uint) error {
+	if err := ur.db.Where("organization_id=?", organizationId).Find(users).Error; err != nil {
 		return err
 	}
 

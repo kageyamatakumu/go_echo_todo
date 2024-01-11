@@ -52,6 +52,7 @@ func NewRouter(uc controller.IUserController, tc controller.ITaskController, oc 
 		SigningKey: []byte(os.Getenv("SECRET")),
 		TokenLookup: "cookie:jwtToken",
 	}))
+	o.GET("/:organizationId/users", uc.GetOrganizationUsers)
 	o.GET("/created", oc.GetCreatedOrganizationsByUserId)
 	o.GET("/lists", oc.ListOrganizations)
 	o.POST("/create", oc.CreateOrganization)

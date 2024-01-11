@@ -5,6 +5,7 @@ import (
 	"go-rest-api/usecase"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
@@ -25,6 +26,8 @@ type IUserController interface {
 	AssignUserToTeam(c echo.Context) error
 	// ユーザーをチームから外す
 	UnassignFromTeam(c echo.Context) error
+	// 組織内のユーザー一覧情報を取得する
+	GetOrganizationUsers(c echo.Context) error
 }
 
 type userController struct {
@@ -170,4 +173,17 @@ func (uc *userController) UnassignFromTeam(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, teamMemberRes)
+}
+
+
+func (uc *userController) GetOrganizationUsers(c echo.Context) error {
+	id := c.Param("organizationId")
+	organizationId, _ := strconv.Atoi(id)
+
+	usersRes, err := uc.uu.GetOrganizationUsers(uint(organizationId))
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, usersRes)
 }
